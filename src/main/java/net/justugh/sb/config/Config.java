@@ -10,7 +10,7 @@ public class Config {
 
     private String token = "";
     private String commandIndicator = ">";
-    private String playingMessage = "to your suggestions.";
+    private String playingMessage = "your suggestions.";
     private Activity.ActivityType activity = Activity.ActivityType.LISTENING;
 
     private HashMap<Long, Long> suggestionChannels = new HashMap<>();
