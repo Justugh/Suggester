@@ -34,6 +34,12 @@ public class Bot {
     private void launch() {
         loadConfig();
 
+        if (config.getToken().isEmpty() || config.getToken() == null) {
+            System.out.println("[ERROR LOGGING]: Cannot start the bot, auth token is invalid.");
+            System.exit(0);
+            return;
+        }
+
         try {
             JDABuilder builder = new JDABuilder(AccountType.BOT);
             builder.setToken(config.getToken());
@@ -55,7 +61,7 @@ public class Bot {
     private void loadConfig() {
         File configFile = new File("config.json");
 
-        if(!configFile.exists()) {
+        if (!configFile.exists()) {
             config = new Config();
 
             try {
