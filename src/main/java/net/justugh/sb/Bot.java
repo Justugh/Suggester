@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @Getter
 public class Bot {
@@ -65,7 +66,7 @@ public class Bot {
             config = new Config();
 
             try {
-                FileUtils.write(configFile, new GsonBuilder().setPrettyPrinting().create().toJson(config), Charset.defaultCharset());
+                FileUtils.write(configFile, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(config), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,7 +75,7 @@ public class Bot {
                 config = new GsonBuilder().create().fromJson(new FileReader(configFile), Config.class);
 
                 // We do this to make sure the config has any new fields from the Config class
-                FileUtils.write(configFile, new GsonBuilder().setPrettyPrinting().create().toJson(config), Charset.defaultCharset());
+                FileUtils.write(configFile, new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(config), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 e.printStackTrace();
             }
