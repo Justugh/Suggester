@@ -30,13 +30,13 @@ public class SuggestionManager extends ListenerAdapter {
 
             if(event.getReactionEmote().getEmoji().equalsIgnoreCase("⛔")) {
                 changeSuggestionState(message, event.getMember(), "Rejected");
-                Bot.getInstance().getUserManager().getUserData(message.getAuthor().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
+                Bot.getInstance().getUserManager().getUserData(event.getUser().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
             } else if(event.getReactionEmote().getEmoji().equalsIgnoreCase("✔")) {
                 changeSuggestionState(message, event.getMember(), "Accepted");
-                Bot.getInstance().getUserManager().getUserData(message.getAuthor().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
+                Bot.getInstance().getUserManager().getUserData(event.getUser().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
             }
 
-            Bot.getInstance().getUserManager().getUserData(message.getAuthor().getIdLong()).save();
+            Bot.getInstance().getUserManager().getUserData(event.getUser().getIdLong()).save();
         }
     }
 
@@ -69,7 +69,7 @@ public class SuggestionManager extends ListenerAdapter {
         sentMessage.addReaction("✅").queue();
         sentMessage.addReaction("❎").queue();
 
-        Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).getSuggestions().add(new SuggestionData(suggestion, suggestionChannel.getIdLong(), message.getIdLong(), new Date(), SuggestionData.SuggestionState.OPEN));
+        Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).getSuggestions().add(new SuggestionData(suggestion, suggestionChannel.getIdLong(), sentMessage.getIdLong(), new Date(), SuggestionData.SuggestionState.OPEN));
         Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).save();
 
         return suggestionChannel;

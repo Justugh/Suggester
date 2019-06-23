@@ -22,6 +22,7 @@ public class CommandManager extends ListenerAdapter {
         commandList.add(new HelpCommand());
         commandList.add(new AcceptCommand());
         commandList.add(new RejectCommand());
+        commandList.add(new UserCommand());
     }
 
     @Override

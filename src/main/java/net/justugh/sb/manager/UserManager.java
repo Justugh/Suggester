@@ -1,43 +1,73 @@
 package net.justugh.sb.manager;
 
 import com.google.gson.GsonBuilder;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import com.google.gson.JsonParser;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.justugh.sb.data.UserData;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class UserManager extends ListenerAdapter {
 
-    @Override
-    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        if(getUserData(event.getUser().getIdLong()) == null) {
-            UserData userData = new UserData(event.getUser().getIdLong());
-
-            try {
-                FileUtils.write(userData.getUserFile(), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(userData.getUserFile()), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+    private HashMap<Long, UserData> userCache = new HashMap<>();
 
     public UserData getUserData(long userID) {
         File playerFile = new File("users" + File.separator + userID + ".json");
 
-        try {
-            return playerFile.exists() ? new GsonBuilder().create().fromJson(new FileReader(playerFile), UserData.class) : null;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        if(!playerFile.exists()) {
+            UserData userData = new UserData(userID);
+
+            try {
+                FileUtils.write(userData.getUserFile(), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(userData), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return userData;
+        } else {
+            if(userCache.containsKey(userID)) {
+                return userCache.get(userID);
+            }
+
+            try {
+                UserData data = new GsonBuilder().setPrettyPrinting().create().fromJson(new FileReader(playerFile), UserData.class);
+                userCache.put(userID, data);
+
+                return data;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         return null;
+    }
+
+    public String postToHastebin(UserData data) {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPost post = new HttpPost("https://hastebin.com/documents");
+
+        try {
+            post.setEntity(new StringEntity(new GsonBuilder().setPrettyPrinting().create().toJson(data)));
+
+            HttpResponse response = client.execute(post);
+            String result = EntityUtils.toString(response.getEntity());
+            return "https://hastebin.com/" + new JsonParser().parse(result).getAsJsonObject().get("key").getAsString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Could not post!";
     }
 
 }

@@ -20,7 +20,7 @@ public class SuggestionData {
     public enum SuggestionState {
         OPEN,
         ACCEPTED,
-        REJECTED;
+        REJECTED
     }
 
 }

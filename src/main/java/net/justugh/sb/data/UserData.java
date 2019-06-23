@@ -23,7 +23,7 @@ public class UserData {
 
     public void save() {
         try {
-            FileUtils.write(new File("users" + File.separator + userID + ".json"), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this), StandardCharsets.UTF_8);
+            FileUtils.write(getUserFile(), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -35,6 +35,14 @@ public class UserData {
 
     public SuggestionData getSuggestionByMessage(long messageID) {
         return suggestions.stream().filter(suggestionData -> suggestionData.getMessageID() == messageID).findFirst().orElse(null);
+    }
+
+    public long getAcceptedSuggestions() {
+        return suggestions.stream().filter(suggestionData -> suggestionData.getSuggestionState() == SuggestionData.SuggestionState.ACCEPTED).count();
+    }
+
+    public long getRejectedSuggestions() {
+        return suggestions.stream().filter(suggestionData -> suggestionData.getSuggestionState() == SuggestionData.SuggestionState.REJECTED).count();
     }
 
 }
