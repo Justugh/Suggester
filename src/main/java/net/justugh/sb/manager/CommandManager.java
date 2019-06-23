@@ -10,6 +10,7 @@ import net.justugh.sb.command.impl.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CommandManager extends ListenerAdapter {
 
@@ -33,7 +34,7 @@ public class CommandManager extends ListenerAdapter {
 
         if (message.startsWith(Bot.getInstance().getConfig().getCommandIndicator())) {
             String commandName = message.substring(1).split(" ")[0];
-            String[] commandArgs = getCleanArgs(message.replaceFirst(Bot.getInstance().getConfig().getCommandIndicator() + commandName, ""));
+            String[] commandArgs = getCleanArgs(message.replaceFirst(Pattern.quote(Bot.getInstance().getConfig().getCommandIndicator() + commandName), ""));
 
             if (commandList.stream().anyMatch(command -> command.getName().equalsIgnoreCase(commandName))) {
                 event.getMessage().delete().queue();

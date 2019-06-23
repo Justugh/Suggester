@@ -172,7 +172,7 @@ public class ConfigCommand extends Command {
         Config config = Bot.getInstance().getConfig();
 
         Message message = new MessageBuilder(new EmbedBuilder()
-                .setDescription("**Note**: All values can be changed using >config")
+                .setDescription("**Note**: All values can be changed using " + Bot.getInstance().getConfig().getCommandIndicator() +  "config")
                 .setColor(new Color(10601844))
                 .setTimestamp(Instant.now())
                 .setFooter("Configuration", Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
@@ -190,7 +190,7 @@ public class ConfigCommand extends Command {
 
     private void displayHelp(TextChannel channel) {
         Message message = new MessageBuilder(new EmbedBuilder()
-                .setDescription("**Note**: All commands start with >config")
+                .setDescription("**Note**: All commands start with " + Bot.getInstance().getConfig().getCommandIndicator() + "config")
                 .setColor(new Color(10601844))
                 .setTimestamp(Instant.now())
                 .setFooter("Command List", Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
