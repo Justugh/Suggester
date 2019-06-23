@@ -6,7 +6,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.justugh.sb.Bot;
 import net.justugh.sb.command.Command;
 import net.justugh.sb.command.CommandInfo;
-import net.justugh.sb.command.impl.ExampleCommand;
+import net.justugh.sb.command.impl.ConfigCommand;
+import net.justugh.sb.command.impl.SuggestCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,8 @@ public class CommandManager extends ListenerAdapter {
     private List<Command> commandList = new ArrayList<>();
 
     public CommandManager() {
-        commandList.add(new ExampleCommand());
+        commandList.add(new ConfigCommand());
+        commandList.add(new SuggestCommand());
     }
 
     @Override
@@ -40,7 +42,7 @@ public class CommandManager extends ListenerAdapter {
                 }
 
                 if (command.getPermission() == null || command.getPermission() == Permission.UNKNOWN || event.getMember().hasPermission(command.getPermission())) {
-                    command.execute(new CommandInfo(event.getMember(), commandArgs, event.getTextChannel()));
+                    command.execute(new CommandInfo(event.getMember(), event.getMessage(), commandArgs, event.getTextChannel()));
                 }
             }
         }
@@ -49,8 +51,8 @@ public class CommandManager extends ListenerAdapter {
     /**
      * Gets clean args from a provided command string.
      *
-     * @param rawArgs - The raw arguments.
-     * @return String[] - Clean arguments.
+     * @param rawArgs The raw arguments.
+     * @return Clean arguments.
      */
     public String[] getCleanArgs(String rawArgs) {
         return rawArgs.isEmpty() ? new String[]{} : rawArgs.trim().isEmpty() ? new String[]{} : rawArgs.trim().split(" ");
