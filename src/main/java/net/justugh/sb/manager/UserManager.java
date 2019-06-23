@@ -3,7 +3,7 @@ package net.justugh.sb.manager;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.justugh.sb.data.UserData;
+import net.justugh.sb.guild.data.UserData;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,11 +23,11 @@ public class UserManager extends ListenerAdapter {
 
     private HashMap<Long, UserData> userCache = new HashMap<>();
 
-    public UserData getUserData(long userID) {
-        File playerFile = new File("users" + File.separator + userID + ".json");
+    public UserData getUserData(long guildID, long userID) {
+        File playerFile = new File("guilds" + File.separator + guildID + File.separator + "users" + File.separator + userID + ".json");
 
         if(!playerFile.exists()) {
-            UserData userData = new UserData(userID);
+            UserData userData = new UserData(userID, guildID);
 
             try {
                 FileUtils.write(userData.getUserFile(), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(userData), StandardCharsets.UTF_8);

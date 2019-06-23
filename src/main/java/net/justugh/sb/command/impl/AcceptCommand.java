@@ -19,15 +19,15 @@ public class AcceptCommand extends Command {
             EmbedUtil.error(info.getChannel(), "You must provide a suggestion to accept! `>accept <message ID>`");
         } else {
             try {
-                if(Bot.getInstance().getConfig().getSuggestionChannels().keySet().contains(info.getChannel().getIdLong())) {
-                    Message message = Bot.getInstance().getJdaInstance().getTextChannelById(Bot.getInstance().getConfig().getSuggestionChannels().get(info.getChannel().getIdLong()))
+                if(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().keySet().contains(info.getChannel().getIdLong())) {
+                    Message message = Bot.getInstance().getJdaInstance().getTextChannelById(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().get(info.getChannel().getIdLong()))
                             .retrieveMessageById(info.getArgs()[0]).complete();
 
                     Bot.getInstance().getSuggestionManager().changeSuggestionState(message, info.getCaller(), "Accepted");
                 }
 
-                if(!Bot.getInstance().getSuggestionManager().isSuggestionChannel(info.getChannel().getIdLong())) {
-                    Message message = Bot.getInstance().getJdaInstance().getTextChannelById(Bot.getInstance().getConfig().getDefaultSuggestionChannel()).retrieveMessageById(info.getArgs()[0]).complete();
+                if(!Bot.getInstance().getSuggestionManager().isSuggestionChannel(info.getGuild().getIdLong(), info.getChannel().getIdLong())) {
+                    Message message = Bot.getInstance().getJdaInstance().getTextChannelById(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getDefaultSuggestionChannel()).retrieveMessageById(info.getArgs()[0]).complete();
 
                     Bot.getInstance().getSuggestionManager().changeSuggestionState(message, info.getCaller(), "Accepted");
                     return;

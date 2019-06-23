@@ -1,4 +1,4 @@
-package net.justugh.sb.data;
+package net.justugh.sb.guild.data;
 
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
@@ -14,11 +14,13 @@ import java.util.List;
 public class UserData {
 
     private long userID;
+    private long guildID;
 
     private List<SuggestionData> suggestions = new ArrayList<>();
 
-    public UserData(long userID) {
+    public UserData(long userID, long guildID) {
         this.userID = userID;
+        this.guildID = guildID;
     }
 
     public void save() {
@@ -30,7 +32,7 @@ public class UserData {
     }
 
     public File getUserFile() {
-        return new File("users" + File.separator + userID + ".json");
+        return new File("guilds" + File.separator + guildID + File.separator + "users" + File.separator + userID + ".json");
     }
 
     public SuggestionData getSuggestionByMessage(long messageID) {

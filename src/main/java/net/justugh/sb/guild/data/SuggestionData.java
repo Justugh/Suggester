@@ -1,4 +1,4 @@
-package net.justugh.sb.data;
+package net.justugh.sb.guild.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

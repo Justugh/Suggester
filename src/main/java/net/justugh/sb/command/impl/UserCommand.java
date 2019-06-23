@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.justugh.sb.Bot;
 import net.justugh.sb.command.Command;
 import net.justugh.sb.command.CommandInfo;
-import net.justugh.sb.data.UserData;
+import net.justugh.sb.guild.data.UserData;
 import net.justugh.sb.util.EmbedUtil;
 
 import java.awt.*;
@@ -34,7 +34,7 @@ public class UserCommand extends Command {
     }
 
     private void displayUserData(TextChannel channel, Member requester, Member user) {
-        UserData userData = Bot.getInstance().getUserManager().getUserData(user.getIdLong());
+        UserData userData = Bot.getInstance().getUserManager().getUserData(user.getGuild().getIdLong(), user.getIdLong());
 
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setColor(new Color(10601844))

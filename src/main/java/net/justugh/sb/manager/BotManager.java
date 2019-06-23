@@ -14,7 +14,7 @@ public class BotManager extends ListenerAdapter {
             return;
         }
 
-        Bot.getInstance().getConfig().setDefaultSuggestionChannel(event.getGuild().getDefaultChannel().getIdLong());
-        Bot.getInstance().getConfig().save();
+        Bot.getInstance().getGuildConfigCache().get(event.getGuild().getIdLong()).setDefaultSuggestionChannel(event.getGuild().getDefaultChannel().getIdLong());
+        Bot.getInstance().getGuildConfigCache().get(event.getGuild().getIdLong()).save();
     }
 }

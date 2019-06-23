@@ -3,6 +3,7 @@ package net.justugh.sb.command;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,6 +13,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 @AllArgsConstructor
 public class CommandInfo {
 
+    private Guild guild;
     private Member caller;
     private Message message;
     private String[] args;

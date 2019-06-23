@@ -9,8 +9,9 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.justugh.sb.Bot;
-import net.justugh.sb.config.Config;
-import net.justugh.sb.data.SuggestionData;
+import net.justugh.sb.guild.config.GuildConfig;
+import net.justugh.sb.guild.data.SuggestionData;
+import net.justugh.sb.guild.data.UserData;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -21,22 +22,25 @@ public class SuggestionManager extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
-        if(!isSuggestionChannel(event.getChannel().getIdLong()) || event.getChannel().retrieveMessageById(event.getMessageId()).complete().getAuthor() != event.getJDA().getSelfUser()) {
+        if(!isSuggestionChannel(event.getGuild().getIdLong(), event.getChannel().getIdLong())
+                || event.getChannel().retrieveMessageById(event.getMessageId()).complete().getAuthor() != event.getJDA().getSelfUser()
+                || event.getUser() == Bot.getInstance().getJdaInstance().getSelfUser()) {
             return;
         }
 
         if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             Message message = event.getChannel().retrieveMessageById(event.getMessageId()).complete();
+            UserData userData = Bot.getInstance().getUserManager().getUserData(event.getGuild().getIdLong(), event.getUser().getIdLong());
 
             if(event.getReactionEmote().getEmoji().equalsIgnoreCase("⛔")) {
                 changeSuggestionState(message, event.getMember(), "Rejected");
-                Bot.getInstance().getUserManager().getUserData(event.getUser().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
+                userData.getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
             } else if(event.getReactionEmote().getEmoji().equalsIgnoreCase("✔")) {
                 changeSuggestionState(message, event.getMember(), "Accepted");
-                Bot.getInstance().getUserManager().getUserData(event.getUser().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
+                userData.getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
             }
 
-            Bot.getInstance().getUserManager().getUserData(event.getUser().getIdLong()).save();
+            userData.save();
         }
     }
 
@@ -49,6 +53,7 @@ public class SuggestionManager extends ListenerAdapter {
      * @return The suggestion channel
      */
     public TextChannel sendSuggestion(Member suggester, long channelID, String suggestion) {
+
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setColor(Color.GREEN)
                 .setAuthor("Suggestion from " + suggester.getEffectiveName() + "#" + suggester.getUser().getDiscriminator(), null, suggester.getUser().getAvatarUrl())
@@ -57,7 +62,7 @@ public class SuggestionManager extends ListenerAdapter {
                 .setTimestamp(Instant.now());
         Message message = new MessageBuilder(embedBuilder.build()).build();
 
-        TextChannel suggestionChannel = getSuggestionChannel(channelID);
+        TextChannel suggestionChannel = getSuggestionChannel(suggester.getGuild().getIdLong(), channelID);
 
         if(suggestionChannel == null) {
             System.out.println("[Suggester]: Default suggestion channel is null.");
@@ -69,8 +74,10 @@ public class SuggestionManager extends ListenerAdapter {
         sentMessage.addReaction("✅").queue();
         sentMessage.addReaction("❎").queue();
 
-        Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).getSuggestions().add(new SuggestionData(suggestion, suggestionChannel.getIdLong(), sentMessage.getIdLong(), new Date(), SuggestionData.SuggestionState.OPEN));
-        Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).save();
+        UserData userData = Bot.getInstance().getUserManager().getUserData(suggester.getGuild().getIdLong(), suggester.getIdLong());
+
+        userData.getSuggestions().add(new SuggestionData(suggestion, suggestionChannel.getIdLong(), sentMessage.getIdLong(), new Date(), SuggestionData.SuggestionState.OPEN));
+        userData.save();
 
         return suggestionChannel;
     }
@@ -106,8 +113,9 @@ public class SuggestionManager extends ListenerAdapter {
      * @param channelID The channel ID.
      * @return If the channel is a suggestion Channel.
      */
-    public boolean isSuggestionChannel(long channelID) {
-        return Bot.getInstance().getConfig().getSuggestionChannels().values().contains(channelID) || Bot.getInstance().getConfig().getDefaultSuggestionChannel() == channelID;
+    public boolean isSuggestionChannel(long guildID, long channelID) {
+        return Bot.getInstance().getGuildConfigCache().get(guildID).getSuggestionChannels().values().contains(channelID)
+                || Bot.getInstance().getGuildConfigCache().get(guildID).getDefaultSuggestionChannel() == channelID;
     }
 
     /**
@@ -119,8 +127,8 @@ public class SuggestionManager extends ListenerAdapter {
      * @param channelID The specified channel ID
      * @return An instance of the parallel suggestion channel.
      */
-    public TextChannel getSuggestionChannel(long channelID) {
-        Config config = Bot.getInstance().getConfig();
+    public TextChannel getSuggestionChannel(long guildID, long channelID) {
+        GuildConfig config = Bot.getInstance().getGuildConfigCache().get(guildID);
 
         if(!config.getSuggestionChannels().containsKey(channelID)) {
             return Bot.getInstance().getJdaInstance().getTextChannelById(config.getDefaultSuggestionChannel());
