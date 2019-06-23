@@ -10,10 +10,12 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.justugh.sb.Bot;
 import net.justugh.sb.config.Config;
+import net.justugh.sb.data.SuggestionData;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.time.Instant;
+import java.util.Date;
 
 public class SuggestionManager extends ListenerAdapter {
 
@@ -24,11 +26,17 @@ public class SuggestionManager extends ListenerAdapter {
         }
 
         if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            Message message = event.getChannel().retrieveMessageById(event.getMessageId()).complete();
+
             if(event.getReactionEmote().getEmoji().equalsIgnoreCase("⛔")) {
-                changeSuggestionState(event.getChannel().retrieveMessageById(event.getMessageId()).complete(), event.getMember(), "Rejected");
+                changeSuggestionState(message, event.getMember(), "Rejected");
+                Bot.getInstance().getUserManager().getUserData(message.getAuthor().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
             } else if(event.getReactionEmote().getEmoji().equalsIgnoreCase("✔")) {
-                changeSuggestionState(event.getChannel().retrieveMessageById(event.getMessageId()).complete(), event.getMember(), "Accepted");
+                changeSuggestionState(message, event.getMember(), "Accepted");
+                Bot.getInstance().getUserManager().getUserData(message.getAuthor().getIdLong()).getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
             }
+
+            Bot.getInstance().getUserManager().getUserData(message.getAuthor().getIdLong()).save();
         }
     }
 
@@ -60,6 +68,10 @@ public class SuggestionManager extends ListenerAdapter {
         Message sentMessage = suggestionChannel.sendMessage(message).complete();
         sentMessage.addReaction("✅").queue();
         sentMessage.addReaction("❎").queue();
+
+        Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).getSuggestions().add(new SuggestionData(suggestion, suggestionChannel.getIdLong(), message.getIdLong(), new Date(), SuggestionData.SuggestionState.OPEN));
+        Bot.getInstance().getUserManager().getUserData(suggester.getIdLong()).save();
+
         return suggestionChannel;
     }
 

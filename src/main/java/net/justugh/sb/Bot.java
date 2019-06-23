@@ -10,6 +10,7 @@ import net.justugh.sb.config.Config;
 import net.justugh.sb.manager.BotManager;
 import net.justugh.sb.manager.CommandManager;
 import net.justugh.sb.manager.SuggestionManager;
+import net.justugh.sb.manager.UserManager;
 import org.apache.commons.io.FileUtils;
 
 import javax.security.auth.login.LoginException;
@@ -26,6 +27,7 @@ public class Bot {
     private Config config;
 
     private SuggestionManager suggestionManager;
+    private UserManager userManager;
 
     public static void main(String[] args) {
         new Bot().launch();
@@ -68,10 +70,12 @@ public class Bot {
      */
     private void loadManagers() {
         suggestionManager = new SuggestionManager();
+        userManager = new UserManager();
 
         jdaInstance.addEventListener(new BotManager());
         jdaInstance.addEventListener(new CommandManager());
         jdaInstance.addEventListener(suggestionManager);
+        jdaInstance.addEventListener(userManager);
     }
 
     /**
