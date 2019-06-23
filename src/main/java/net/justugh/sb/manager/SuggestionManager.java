@@ -25,9 +25,9 @@ public class SuggestionManager extends ListenerAdapter {
 
         if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             if(event.getReactionEmote().getEmoji().equalsIgnoreCase("⛔")) {
-                changeSuggestionState(event.getChannel().retrieveMessageById(event.getMessageId()).complete(), "Rejected");
+                changeSuggestionState(event.getChannel().retrieveMessageById(event.getMessageId()).complete(), event.getMember(), "Rejected");
             } else if(event.getReactionEmote().getEmoji().equalsIgnoreCase("✔")) {
-                changeSuggestionState(event.getChannel().retrieveMessageById(event.getMessageId()).complete(), "Accepted");
+                changeSuggestionState(event.getChannel().retrieveMessageById(event.getMessageId()).complete(), event.getMember(), "Accepted");
             }
         }
     }
@@ -38,8 +38,9 @@ public class SuggestionManager extends ListenerAdapter {
      * @param suggester The Member suggesting.
      * @param channelID The channel ID where the suggestion was sent.
      * @param suggestion The raw string of the suggestion.
+     * @return The suggestion channel
      */
-    public void sendSuggestion(Member suggester, long channelID, String suggestion) {
+    public TextChannel sendSuggestion(Member suggester, long channelID, String suggestion) {
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setColor(Color.GREEN)
                 .setAuthor("Suggestion from " + suggester.getEffectiveName() + "#" + suggester.getUser().getDiscriminator(), null, suggester.getUser().getAvatarUrl())
@@ -53,12 +54,13 @@ public class SuggestionManager extends ListenerAdapter {
         if(suggestionChannel == null) {
             System.out.println("[Suggester]: Default suggestion channel is null.");
             Bot.getInstance().getJdaInstance().getTextChannelById(channelID).sendMessage(suggester.getAsMention() + " The default suggestion channel isn't properly configured. Fix this using `>config default-channel`!").queue();
-            return;
+            return null;
         }
 
         Message sentMessage = suggestionChannel.sendMessage(message).complete();
         sentMessage.addReaction("✅").queue();
         sentMessage.addReaction("❎").queue();
+        return suggestionChannel;
     }
 
     /**
@@ -66,9 +68,10 @@ public class SuggestionManager extends ListenerAdapter {
      * of a suggestion.
      *
      * @param message The message instance of the suggestion.
+     * @param modifier The member who modified the suggestion.
      * @param state The new "state" of the suggestion.
      */
-    private void changeSuggestionState(Message message, String state) {
+    public void changeSuggestionState(Message message, Member modifier, String state) {
         if(message.getEmbeds().isEmpty()) {
             return;
         }
@@ -79,7 +82,7 @@ public class SuggestionManager extends ListenerAdapter {
 
         EmbedBuilder embedBuilder = new EmbedBuilder(message.getEmbeds().get(0))
                 .setAuthor(state + " " + message.getEmbeds().get(0).getAuthor().getName(), null, message.getEmbeds().get(0).getAuthor().getIconUrl())
-                .setFooter("Status: " + state);
+                .setFooter(state + " by " + modifier.getEffectiveName() + "#" + modifier.getUser().getDiscriminator());
         message.editMessage(embedBuilder.build()).queue();
         message.clearReactions().queue();
     }

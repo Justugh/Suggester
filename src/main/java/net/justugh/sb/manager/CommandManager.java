@@ -6,8 +6,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.justugh.sb.Bot;
 import net.justugh.sb.command.Command;
 import net.justugh.sb.command.CommandInfo;
-import net.justugh.sb.command.impl.ConfigCommand;
-import net.justugh.sb.command.impl.SuggestCommand;
+import net.justugh.sb.command.impl.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +18,14 @@ public class CommandManager extends ListenerAdapter {
     public CommandManager() {
         commandList.add(new ConfigCommand());
         commandList.add(new SuggestCommand());
+        commandList.add(new HelpCommand());
+        commandList.add(new AcceptCommand());
+        commandList.add(new RejectCommand());
     }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        String message = event.getMessage().getContentRaw().toLowerCase();
+        String message = event.getMessage().getContentRaw();
 
         if (!event.getChannelType().isGuild() || event.getMember() == null) {
             return;
