@@ -19,7 +19,12 @@ public class SuggestCommand extends Command {
             EmbedUtil.error(info.getChannel(), "You must provide something to suggest!");
         } else {
             TextChannel channel = Bot.getInstance().getSuggestionManager().sendSuggestion(info.getCaller(), info.getChannel().getIdLong(), String.join(" ", info.getArgs()));
-            EmbedUtil.info(info.getCaller().getUser().openPrivateChannel().complete(), "Suggestion Submitted", info.getCaller().getAsMention() + " Your suggestion has been submitted, view it in " + channel.getAsMention() + "!");
+
+            if(Bot.getInstance().getGuildConfig(info.getGuild().getIdLong()).isDmNotification()) {
+                EmbedUtil.info(info.getCaller().getUser().openPrivateChannel().complete(), "Suggestion Submitted", info.getCaller().getAsMention() + " Your suggestion has been submitted, view it in " + channel.getAsMention() + "!");
+            } else {
+                EmbedUtil.info(info.getChannel(), "Suggestion Submitted", info.getCaller().getAsMention() + " Your suggestion has been submitted, view it in " + channel.getAsMention() + "!");
+            }
         }
     }
 }

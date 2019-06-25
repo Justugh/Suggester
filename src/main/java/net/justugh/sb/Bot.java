@@ -63,6 +63,7 @@ public class Bot {
             builder.setActivity(Activity.of(config.getActivity(), config.getPlayingMessage()));
 
             jdaInstance = builder.build();
+            // We need to do this to make sure we can get the bots guilds to load the configs.
             jdaInstance.awaitReady();
             loadGuildConfigs();
             loadManagers();
@@ -92,64 +93,75 @@ public class Bot {
     private void loadConfig() {
         File configFile = new File("config.json");
 
-        if (!configFile.exists()) {
-            config = new Config();
+        try {
+            if (!configFile.exists()) {
+                config = new Config();
 
-            try {
                 FileUtils.write(configFile, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(config), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
+            } else {
                 config = new GsonBuilder().create().fromJson(new FileReader(configFile), Config.class);
 
                 // We do this to make sure the config has any new fields from the GuildConfig class
                 FileUtils.write(configFile, new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(config), StandardCharsets.UTF_8);
-
-                config = new GsonBuilder().create().fromJson(new FileReader(configFile), Config.class);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch(IOException e) {
+            e.printStackTrace();
         }
     }
 
+    /**
+     * Load Guild configuration files.
+     */
     private void loadGuildConfigs() {
         for (Guild guild : jdaInstance.getSelfUser().getMutualGuilds()) {
-            File guildConfigFile = new File("guilds" + File.separator + guild.getIdLong() + File.separator + "config.json");
+            File guildFile = new File("guilds" + File.separator + guild.getIdLong() + File.separator + "config.json");
 
-            if (!guildConfigFile.exists()) {
-                GuildConfig guildConfig = new GuildConfig(guild.getIdLong());
-                guildConfig.setDefaultSuggestionChannel(guild.getDefaultChannel().getIdLong());
+            try {
+                if (!guildFile.exists()) {
+                    GuildConfig guildConfig = new GuildConfig(guild.getIdLong());
 
-                guildConfigCache.put(guild.getIdLong(), guildConfig);
-
-                try {
-                    FileUtils.write(guildConfigFile, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(guildConfig), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    GuildConfig guildConfig = new GsonBuilder().create().fromJson(new FileReader(guildConfigFile), GuildConfig.class);
-
-                    if(guildConfig.getDefaultSuggestionChannel() == 0) {
+                    if(guild.getDefaultChannel() != null) {
                         guildConfig.setDefaultSuggestionChannel(guild.getDefaultChannel().getIdLong());
                     }
 
                     guildConfigCache.put(guild.getIdLong(), guildConfig);
 
-                    // We do this to make sure the config has any new fields from the GuildConfig class
-                    FileUtils.write(guildConfigFile, new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(guildConfig), StandardCharsets.UTF_8);
+                    FileUtils.write(guildFile, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(guildConfig), StandardCharsets.UTF_8);
+                } else {
+                    GuildConfig guildConfig = new GsonBuilder().create().fromJson(new FileReader(guildFile), GuildConfig.class);
 
-                    guildConfigCache.put(guild.getIdLong(), new GsonBuilder().create().fromJson(new FileReader(guildConfigFile), GuildConfig.class));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    if(guildConfig.getDefaultSuggestionChannel() == 0) {
+                        if(guild.getDefaultChannel() != null) {
+                            guildConfig.setDefaultSuggestionChannel(guild.getDefaultChannel().getIdLong());
+                        }
+                    }
+
+                    guildConfigCache.put(guild.getIdLong(), guildConfig);
+
+                    // We do this to make sure the config has any new fields from the GuildConfig class
+                    FileUtils.write(guildFile, new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(guildConfig), StandardCharsets.UTF_8);
                 }
+            } catch(IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
+    /**
+     * Get the Guild configuration.
+     *
+     * @param guildID The Guild's ID.
+     * @return The instance of the Guild Config.
+     */
+    public GuildConfig getGuildConfig(long guildID) {
+        return guildConfigCache.get(guildID);
+    }
+
+    /**
+     * Get the Bot instance.
+     *
+     * @return The instance of the Bot.
+     */
     public static Bot getInstance() {
         return instance;
     }

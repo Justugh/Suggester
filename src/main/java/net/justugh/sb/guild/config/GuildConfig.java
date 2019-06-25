@@ -17,6 +17,7 @@ public class GuildConfig {
 
     private Long guildID;
     private String commandIndicator = ">";
+    private boolean dmNotification = true;
     private Permission reactionStatePermission = Permission.MESSAGE_MANAGE;
     private HashMap<String, Permission> commandPermissions = new HashMap<>();
 

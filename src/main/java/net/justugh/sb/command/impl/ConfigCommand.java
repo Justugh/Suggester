@@ -157,6 +157,15 @@ public class ConfigCommand extends Command {
                 }
             } else if(info.getArgs()[0].equalsIgnoreCase("permissions")) {
                 displayCommandPermissions(info.getChannel());
+            } else if(info.getArgs()[0].equalsIgnoreCase("dmnotification")) {
+                if(info.getArgs().length >= 2) {
+                    Bot.getInstance().getGuildConfig(info.getGuild().getIdLong()).setDmNotification(Boolean.parseBoolean(info.getArgs()[1]));
+                    Bot.getInstance().getGuildConfig(info.getGuild().getIdLong()).save();
+
+                    EmbedUtil.info(info.getChannel(), "DM Notifactions Updated", "DM notifactions have been set to: " + Boolean.parseBoolean(info.getArgs()[1]));
+                } else {
+                    EmbedUtil.error(info.getChannel(), "You must put true or false!");
+                }
             }
         }
     }
@@ -202,6 +211,7 @@ public class ConfigCommand extends Command {
                 .setFooter("Configuration", Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .setAuthor("Configuration", null, Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .addField("Command Prefix", guildConfig.getCommandIndicator(), true)
+                .addField("DM Notification", guildConfig.isDmNotification() + "", true)
                 .addField("Reaction State Permission", guildConfig.getReactionStatePermission().name(), true)
                 .addField("Default Suggestion Channel", Bot.getInstance().getJdaInstance().getTextChannelById(guildConfig.getDefaultSuggestionChannel()).getAsMention(), true)
                 .addField("Linked Channels", "Use >config linked to see linked channels.", true)
@@ -220,6 +230,7 @@ public class ConfigCommand extends Command {
                 .setAuthor("Configuration Commands", null, Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .addField("display", "Display the configuration values.", true)
                 .addField("permissions", "Display the command permissions.", true)
+                .addField("dmnotification <boolean>", "Set whether or not to DM about submitted suggestions.", true)
                 .addField("prefix <string>", "Set the command prefix.", true)
                 .addField("linked (channel)", "See the channels linked channel.", true)
                 .addField("default-channel (channel)", "Set the default suggestion channel.", true)
