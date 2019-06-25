@@ -12,6 +12,12 @@ import java.time.Instant;
 
 public class EmbedUtil {
 
+    /**
+     * Send an embed error message.
+     *
+     * @param channel The channel to send the message.
+     * @param content The content of the message.
+     */
     public static void error(TextChannel channel, String content) {
         Message message = new MessageBuilder(new EmbedBuilder()
                 .setDescription(content)
@@ -24,6 +30,13 @@ public class EmbedUtil {
         channel.sendMessage(message).queue();
     }
 
+    /**
+     * Send an embed information message.
+     *
+     * @param channel The channel to send the message.
+     * @param title The title of the embed.
+     * @param content The content of the message.
+     */
     public static void info(TextChannel channel, String title, String content) {
         Message message = new MessageBuilder(new EmbedBuilder()
                 .setDescription(content)
@@ -36,6 +49,13 @@ public class EmbedUtil {
         channel.sendMessage(message).queue();
     }
 
+    /**
+     * Send an embed information message.
+     *
+     * @param channel The channel to send the message.
+     * @param title The title of the embed.
+     * @param content The content of the message.
+     */
     public static void info(PrivateChannel channel, String title, String content) {
         Message message = new MessageBuilder(new EmbedBuilder()
                 .setDescription(content)

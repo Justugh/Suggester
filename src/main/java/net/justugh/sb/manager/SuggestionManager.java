@@ -2,7 +2,6 @@ package net.justugh.sb.manager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,6 +11,7 @@ import net.justugh.sb.Bot;
 import net.justugh.sb.guild.config.GuildConfig;
 import net.justugh.sb.guild.data.SuggestionData;
 import net.justugh.sb.guild.data.UserData;
+import net.justugh.sb.util.EmbedUtil;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -34,10 +34,10 @@ public class SuggestionManager extends ListenerAdapter {
 
             if(event.getReactionEmote().getEmoji().equalsIgnoreCase("⛔")) {
                 changeSuggestionState(message, event.getMember(), "Rejected");
-                userData.getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
+                userData.getSuggestionByMessageID(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.REJECTED);
             } else if(event.getReactionEmote().getEmoji().equalsIgnoreCase("✔")) {
                 changeSuggestionState(message, event.getMember(), "Accepted");
-                userData.getSuggestionByMessage(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
+                userData.getSuggestionByMessageID(message.getIdLong()).setSuggestionState(SuggestionData.SuggestionState.ACCEPTED);
             }
 
             userData.save();
@@ -53,7 +53,6 @@ public class SuggestionManager extends ListenerAdapter {
      * @return The suggestion channel
      */
     public TextChannel sendSuggestion(Member suggester, long channelID, String suggestion) {
-
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setColor(Color.GREEN)
                 .setAuthor("Suggestion from " + suggester.getEffectiveName() + "#" + suggester.getUser().getDiscriminator(), null, suggester.getUser().getAvatarUrl())
@@ -66,7 +65,7 @@ public class SuggestionManager extends ListenerAdapter {
 
         if(suggestionChannel == null) {
             System.out.println("[Suggester]: Default suggestion channel is null.");
-            Bot.getInstance().getJdaInstance().getTextChannelById(channelID).sendMessage(suggester.getAsMention() + " The default suggestion channel isn't properly configured. Fix this using `>config default-channel`!").queue();
+            EmbedUtil.error(Bot.getInstance().getJdaInstance().getTextChannelById(channelID), "The default suggestion channel isn't setup properly!");
             return null;
         }
 

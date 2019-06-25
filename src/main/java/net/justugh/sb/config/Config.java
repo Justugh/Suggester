@@ -19,11 +19,12 @@ public class Config {
     private Activity.ActivityType activity = Activity.ActivityType.LISTENING;
 
     /**
-     * Save the configuration.
+     * Save the configuration to file.
      */
     public void save() {
         try {
-            FileUtils.write(new File( "config.json"), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this), StandardCharsets.UTF_8);
+            FileUtils.write(new File( "config.json"),
+                    new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }

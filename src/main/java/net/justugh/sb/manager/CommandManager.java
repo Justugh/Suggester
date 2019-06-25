@@ -57,10 +57,23 @@ public class CommandManager extends ListenerAdapter {
         }
     }
 
+    /**
+     * Checks to determine if a string is a valid command.
+     *
+     * @param name The command name.
+     * @return Whether or not it's a valid command.
+     */
     public boolean isValidCommand(String name) {
         return commandList.stream().anyMatch(command -> command.getName().equalsIgnoreCase(name));
     }
 
+    /**
+     * Get the command's guild permission.
+     *
+     * @param guildID The command's guild.
+     * @param command The command.
+     * @return The command's permission from the Guild config.
+     */
     public Permission getPermission(long guildID, Command command) {
         GuildConfig guildConfig = Bot.getInstance().getGuildConfigCache().get(guildID);
 

@@ -12,8 +12,7 @@ import java.util.Date;
 public class SuggestionData {
 
     private String suggestion;
-    private long suggestionChannel;
-    private long messageID;
+    private long suggestionChannel, messageID;
     private Date suggestionDate;
     private SuggestionState suggestionState;
 

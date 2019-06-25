@@ -1,11 +1,16 @@
 package net.justugh.sb.manager;
 
+import com.google.gson.GsonBuilder;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.justugh.sb.Bot;
+import net.justugh.sb.guild.config.GuildConfig;
+import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class BotManager extends ListenerAdapter {
 
@@ -15,16 +20,17 @@ public class BotManager extends ListenerAdapter {
             return;
         }
 
-        Bot.getInstance().getGuildConfigCache().get(event.getGuild().getIdLong()).setDefaultSuggestionChannel(event.getGuild().getDefaultChannel().getIdLong());
-        Bot.getInstance().getGuildConfigCache().get(event.getGuild().getIdLong()).save();
-    }
+        File guildFile = new File("guilds" + File.separator + event.getGuild().getIdLong() + File.separator + "config.json");
+        GuildConfig guildConfig = new GuildConfig(event.getGuild().getIdLong());
 
-    @Override
-    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        if(event.getGuild().getIdLong() != 592031551777406977L) {
-            return;
+        guildConfig.setDefaultSuggestionChannel(event.getGuild().getDefaultChannel().getIdLong());
+        Bot.getInstance().getGuildConfigCache().put(event.getGuild().getIdLong(), guildConfig);
+
+        try {
+            FileUtils.write(guildFile, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(guildConfig), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            System.out.println("[Suggester]: Error creating new Guild config.");
+            e.printStackTrace();
         }
-
-        event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(592846541082066953L)).queue();
     }
 }

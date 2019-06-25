@@ -45,7 +45,7 @@ public class UserCommand extends Command {
                 .addField("Created Suggestions", userData.getSuggestions().size() + "", true)
                 .addField("Accepted Suggestions", userData.getAcceptedSuggestions() + "", true)
                 .addField("Rejected Suggestions", userData.getRejectedSuggestions() + "", true)
-                .addField("Raw Data", Bot.getInstance().getUserManager().postToHastebin(userData), true);
+                .addField("Raw Data", Bot.getInstance().getUserManager().postDataToHastebin(userData), true);
 
         channel.sendMessage(embedBuilder.build()).queue();
     }

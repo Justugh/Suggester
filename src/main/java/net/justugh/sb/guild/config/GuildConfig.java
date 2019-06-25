@@ -29,11 +29,12 @@ public class GuildConfig {
     }
 
     /**
-     * Save the configuration.
+     * Save the configuration to file.
      */
     public void save() {
         try {
-            FileUtils.write(new File("guilds" + File.separator + guildID + File.separator + "config.json"), new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this), StandardCharsets.UTF_8);
+            FileUtils.write(new File("guilds" + File.separator + guildID + File.separator + "config.json"),
+                    new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }

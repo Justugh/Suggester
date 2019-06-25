@@ -24,6 +24,7 @@ All config commands by default require the `ADMINISTRATOR` permission.
 | --------------- | ---------------- |
 | \>config display | Display the configuration values. | 
 | \>config permissions | Display command permissions. |
+| \>config dmnotifications [boolean] | Toggle DM notifications for submitted suggestions. |
 | \>config prefix [prefix] | Set the command prefix. |
 | \>config linked [channel] | View the channels linked channel. |
 | \>config default-channel [channel] | Set the default suggestion channel. |

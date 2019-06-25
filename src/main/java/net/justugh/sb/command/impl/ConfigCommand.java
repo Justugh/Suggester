@@ -27,6 +27,8 @@ public class ConfigCommand extends Command {
         if (info.getArgs().length == 0) {
             displayHelp(info.getChannel());
         } else {
+            GuildConfig guildConfig = Bot.getInstance().getGuildConfig(info.getGuild().getIdLong());
+
             if (info.getArgs()[0].equalsIgnoreCase("default-channel")) {
                 if (info.getArgs().length >= 2) {
                     if (info.getMessage().getMentionedChannels().isEmpty()) {
@@ -35,13 +37,13 @@ public class ConfigCommand extends Command {
                     }
 
                     TextChannel taggedChannel = info.getMessage().getMentionedChannels().get(0);
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).setDefaultSuggestionChannel(taggedChannel.getIdLong());
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    guildConfig.setDefaultSuggestionChannel(taggedChannel.getIdLong());
+                    guildConfig.save();
                     displayUpdate(info.getChannel(), info.getCaller(), "Successfully set " + taggedChannel.getAsMention() + " as the default suggestion channel!");
                 } else {
                     TextChannel taggedChannel = info.getChannel();
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).setDefaultSuggestionChannel(taggedChannel.getIdLong());
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    guildConfig.setDefaultSuggestionChannel(taggedChannel.getIdLong());
+                    guildConfig.save();
                     displayUpdate(info.getChannel(), info.getCaller(), "Successfully set " + taggedChannel.getAsMention() + " as the default suggestion channel!");
                 }
             } else if (info.getArgs()[0].equalsIgnoreCase("link-channel")) {
@@ -54,16 +56,16 @@ public class ConfigCommand extends Command {
                     TextChannel mainChannel = info.getMessage().getMentionedChannels().get(0);
                     TextChannel suggestionChannel = info.getMessage().getMentionedChannels().get(1);
 
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().put(mainChannel.getIdLong(), suggestionChannel.getIdLong());
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    guildConfig.getSuggestionChannels().put(mainChannel.getIdLong(), suggestionChannel.getIdLong());
+                    guildConfig.save();
                     displayUpdate(info.getChannel(), info.getCaller(), "Successfully linked " + suggestionChannel.getAsMention() + " as " + mainChannel.getAsMention() + "'s suggestion channel!");
                 } else {
                     EmbedUtil.error(info.getChannel(), "You must provide two channels to link! `>config link-channel <channel> <channel>`!");
                 }
             } else if (info.getArgs()[0].equalsIgnoreCase("prefix")) {
                 if (info.getArgs().length >= 2) {
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).setCommandIndicator(info.getArgs()[1]);
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    guildConfig.setCommandIndicator(info.getArgs()[1]);
+                    guildConfig.save();
                     displayUpdate(info.getChannel(), info.getCaller(), "Successfully set " + info.getArgs()[1] + " as the command prefix!");
                 } else {
                     EmbedUtil.error(info.getChannel(), "You have to provide a new prefix! `>config prefix <string>`!");
@@ -77,30 +79,30 @@ public class ConfigCommand extends Command {
 
                     TextChannel mainChannel = info.getMessage().getMentionedChannels().get(0);
 
-                    if(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().get(mainChannel.getIdLong()) == null) {
+                    if(guildConfig.getSuggestionChannels().get(mainChannel.getIdLong()) == null) {
                         EmbedUtil.error(info.getChannel(), mainChannel.getAsMention() + " doesn't have a linked channel! It uses the default channel.");
                         return;
                     }
 
-                    TextChannel linkedChannel = Bot.getInstance().getJdaInstance().getTextChannelById(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().get(mainChannel.getIdLong()));
+                    TextChannel linkedChannel = Bot.getInstance().getJdaInstance().getTextChannelById(guildConfig.getSuggestionChannels().get(mainChannel.getIdLong()));
 
                     if(linkedChannel == null) {
-                        Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().remove(mainChannel.getIdLong());
+                        guildConfig.getSuggestionChannels().remove(mainChannel.getIdLong());
                         EmbedUtil.error(info.getChannel(), mainChannel.getAsMention() + " doesn't have a linked channel! It uses the default channel.");
                         return;
                     }
 
                     EmbedUtil.info(info.getChannel(), mainChannel.getName() + "'s Linked Channel", mainChannel.getAsMention() + "'s linked channel is " + linkedChannel.getAsMention() + ".");
                 } else {
-                    if(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().get(info.getChannel().getIdLong()) == null) {
+                    if(guildConfig.getSuggestionChannels().get(info.getChannel().getIdLong()) == null) {
                         EmbedUtil.error(info.getChannel(), info.getChannel().getAsMention() + " doesn't have a linked channel! It uses the default channel.");
                         return;
                     }
 
-                    TextChannel linkedChannel = Bot.getInstance().getJdaInstance().getTextChannelById(Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().get(info.getChannel().getIdLong()));
+                    TextChannel linkedChannel = Bot.getInstance().getJdaInstance().getTextChannelById(guildConfig.getSuggestionChannels().get(info.getChannel().getIdLong()));
 
                     if(linkedChannel == null) {
-                        Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getSuggestionChannels().remove(info.getChannel().getIdLong());
+                        guildConfig.getSuggestionChannels().remove(info.getChannel().getIdLong());
                         EmbedUtil.error(info.getChannel(), info.getChannel().getAsMention() + " doesn't have a linked channel! It uses the default channel.");
                         return;
                     }
@@ -121,8 +123,8 @@ public class ConfigCommand extends Command {
                         return;
                     }
 
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).setReactionStatePermission(permission);
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    guildConfig.setReactionStatePermission(permission);
+                    guildConfig.save();
                     EmbedUtil.info(info.getChannel(), "Permission Updated", "Successfully set reaction permission to " + permission.name() + "!");
                 } else {
                     EmbedUtil.error(info.getChannel(), "You must provide a permission! Valid Permissions: `CREATE_INSTANT_INVITE, " +
@@ -149,8 +151,8 @@ public class ConfigCommand extends Command {
                         return;
                     }
 
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getCommandPermissions().put(info.getArgs()[1], permission);
-                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    guildConfig.getCommandPermissions().put(info.getArgs()[1], permission);
+                    guildConfig.save();
                     EmbedUtil.info(info.getChannel(), "Permission Updated", "Successfully set " + info.getArgs()[1] + " command permission to " + permission.name() + "!");
                 } else {
                     EmbedUtil.error(info.getChannel(), "You must provide a valid command and permission!");
@@ -170,6 +172,11 @@ public class ConfigCommand extends Command {
         }
     }
 
+    /**
+     * Display command permissions embed.
+     *
+     * @param channel The channel to send it to.
+     */
     private void displayCommandPermissions(TextChannel channel) {
         GuildConfig guildConfig = Bot.getInstance().getGuildConfigCache().get(channel.getGuild().getIdLong());
 
@@ -189,6 +196,13 @@ public class ConfigCommand extends Command {
         channel.sendMessage(message).queue();
     }
 
+    /**
+     * Send update embed.
+     *
+     * @param displayChannel The channel to send it to.
+     * @param caller The person creating the embed.
+     * @param content The content of the embed.
+     */
     private void displayUpdate(TextChannel displayChannel, Member caller, String content) {
         Message message = new MessageBuilder(new EmbedBuilder()
                 .setDescription(content)
@@ -201,6 +215,11 @@ public class ConfigCommand extends Command {
         displayChannel.sendMessage(message).queue();
     }
 
+    /**
+     * Display configuration values in an embed.
+     *
+     * @param channel The channel to send the embed to.
+     */
     private void displayConfig(TextChannel channel) {
         GuildConfig guildConfig = Bot.getInstance().getGuildConfigCache().get(channel.getGuild().getIdLong());
 
@@ -221,6 +240,11 @@ public class ConfigCommand extends Command {
         channel.sendMessage(message).queue();
     }
 
+    /**
+     * Display command help information.
+     *
+     * @param channel The channel to send it to.
+     */
     private void displayHelp(TextChannel channel) {
         Message message = new MessageBuilder(new EmbedBuilder()
                 .setDescription("**Note**: All commands start with " + Bot.getInstance().getGuildConfigCache().get(channel.getGuild().getIdLong()).getCommandIndicator() + "config")
