@@ -30,6 +30,7 @@ public class Bot {
     private Config config;
     private HashMap<Long, GuildConfig> guildConfigCache = new HashMap<>();
 
+    private CommandManager commandManager;
     private SuggestionManager suggestionManager;
     private UserManager userManager;
 
@@ -75,11 +76,12 @@ public class Bot {
      * them as listeners.
      */
     private void loadManagers() {
+        commandManager = new CommandManager();
         suggestionManager = new SuggestionManager();
         userManager = new UserManager();
 
         jdaInstance.addEventListener(new BotManager());
-        jdaInstance.addEventListener(new CommandManager());
+        jdaInstance.addEventListener(commandManager);
         jdaInstance.addEventListener(suggestionManager);
         jdaInstance.addEventListener(userManager);
     }
@@ -104,6 +106,8 @@ public class Bot {
 
                 // We do this to make sure the config has any new fields from the GuildConfig class
                 FileUtils.write(configFile, new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(config), StandardCharsets.UTF_8);
+
+                config = new GsonBuilder().create().fromJson(new FileReader(configFile), Config.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -137,6 +141,8 @@ public class Bot {
 
                     // We do this to make sure the config has any new fields from the GuildConfig class
                     FileUtils.write(guildConfigFile, new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(guildConfig), StandardCharsets.UTF_8);
+
+                    guildConfigCache.put(guild.getIdLong(), new GsonBuilder().create().fromJson(new FileReader(guildConfigFile), GuildConfig.class));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

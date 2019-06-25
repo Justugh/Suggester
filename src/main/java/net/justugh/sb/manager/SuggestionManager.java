@@ -28,7 +28,7 @@ public class SuggestionManager extends ListenerAdapter {
             return;
         }
 
-        if(event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        if(event.getMember().hasPermission(Bot.getInstance().getGuildConfigCache().get(event.getGuild().getIdLong()).getReactionStatePermission())) {
             Message message = event.getChannel().retrieveMessageById(event.getMessageId()).complete();
             UserData userData = Bot.getInstance().getUserManager().getUserData(event.getGuild().getIdLong(), event.getUser().getIdLong());
 

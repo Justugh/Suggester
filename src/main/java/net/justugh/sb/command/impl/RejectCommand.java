@@ -10,7 +10,7 @@ import net.justugh.sb.util.EmbedUtil;
 public class RejectCommand extends Command {
 
     public RejectCommand() {
-        super("reject", Permission.ADMINISTRATOR);
+        super("reject", Permission.MESSAGE_MANAGE);
     }
 
     @Override

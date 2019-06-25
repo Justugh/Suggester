@@ -1,5 +1,6 @@
 package net.justugh.sb.command.impl;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.justugh.sb.Bot;
 import net.justugh.sb.command.Command;
@@ -9,7 +10,7 @@ import net.justugh.sb.util.EmbedUtil;
 public class SuggestCommand extends Command {
 
     public SuggestCommand() {
-        super("suggest", null);
+        super("suggest", Permission.UNKNOWN);
     }
 
     @Override

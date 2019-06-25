@@ -3,6 +3,7 @@ package net.justugh.sb.guild.config;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import net.dv8tion.jda.api.Permission;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -16,6 +17,8 @@ public class GuildConfig {
 
     private Long guildID;
     private String commandIndicator = ">";
+    private Permission reactionStatePermission = Permission.MESSAGE_MANAGE;
+    private HashMap<String, Permission> commandPermissions = new HashMap<>();
 
     private long defaultSuggestionChannel = 0;
     private HashMap<Long, Long> suggestionChannels = new HashMap<>();

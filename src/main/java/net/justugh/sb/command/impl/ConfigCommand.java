@@ -14,6 +14,7 @@ import net.justugh.sb.util.EmbedUtil;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.Arrays;
 
 public class ConfigCommand extends Command {
 
@@ -107,8 +108,76 @@ public class ConfigCommand extends Command {
                     EmbedUtil.info(info.getChannel(), info.getChannel().getName() + "'s Linked Channel", info.getChannel().getAsMention() + "'s linked channel is " + linkedChannel.getAsMention() + ".");                }
             } else if(info.getArgs()[0].equalsIgnoreCase("display")) {
                 displayConfig(info.getChannel());
+            } else if(info.getArgs()[0].equalsIgnoreCase("reaction-permission")) {
+                if(info.getArgs().length >= 2) {
+                    Permission permission = Arrays.stream(Permission.values()).filter(perm -> perm.name().equalsIgnoreCase(info.getArgs()[1])).findFirst().orElse(null);
+
+                    if(permission == null) {
+                        EmbedUtil.error(info.getChannel(), "You must provide a permission! Valid Permissions: `CREATE_INSTANT_INVITE, " +
+                                "KICK_MEMBERS, BAN_MEMBERS, ADMINISTRATOR, MANAGE_CHANNEL, MANAGE_SERVER, MESSAGE_ADD_REACTION, VIEW_AUDIT_LOGS, PRIORITY_SPEAKER, " +
+                                "VIEW_CHANNEL, MESSAGE_READ, MESSAGE_WRITE, MESSAGE_TTS, MESSAGE_MANAGE, MESSAGE_EMBED_LINKS, MESSAGE_ATTACH_FILES, MESSAGE_HISTORY, " +
+                                "MESSAGE_MENTION_EVERYONE, MESSAGE_EXT_EMOJI, VOICE_CONNECT, VOICE_SPEAK, VOICE_MUTE_OTHERS, VOICE_DEAF_OTHERS, VOICE_MOVE_OTHERS, " +
+                                "VOICE_USE_VAD, NICKNAME_CHANGE, NICKNAME_MANAGE, MANAGE_ROLES, MANAGE_PERMISSIONS, MANAGE_WEBHOOKS, MANAGE_EMOTES, UNKNOWN`");
+                        return;
+                    }
+
+                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).setReactionStatePermission(permission);
+                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    EmbedUtil.info(info.getChannel(), "Permission Updated", "Successfully set reaction permission to " + permission.name() + "!");
+                } else {
+                    EmbedUtil.error(info.getChannel(), "You must provide a permission! Valid Permissions: `CREATE_INSTANT_INVITE, " +
+                            "KICK_MEMBERS, BAN_MEMBERS, ADMINISTRATOR, MANAGE_CHANNEL, MANAGE_SERVER, MESSAGE_ADD_REACTION, VIEW_AUDIT_LOGS, PRIORITY_SPEAKER, " +
+                            "VIEW_CHANNEL, MESSAGE_READ, MESSAGE_WRITE, MESSAGE_TTS, MESSAGE_MANAGE, MESSAGE_EMBED_LINKS, MESSAGE_ATTACH_FILES, MESSAGE_HISTORY, " +
+                            "MESSAGE_MENTION_EVERYONE, MESSAGE_EXT_EMOJI, VOICE_CONNECT, VOICE_SPEAK, VOICE_MUTE_OTHERS, VOICE_DEAF_OTHERS, VOICE_MOVE_OTHERS, " +
+                            "VOICE_USE_VAD, NICKNAME_CHANGE, NICKNAME_MANAGE, MANAGE_ROLES, MANAGE_PERMISSIONS, MANAGE_WEBHOOKS, MANAGE_EMOTES, UNKNOWN`");
+                }
+            } else if(info.getArgs()[0].equalsIgnoreCase("permission")) {
+                if(info.getArgs().length >= 3) {
+                    if(!Bot.getInstance().getCommandManager().isValidCommand(info.getArgs()[1])) {
+                        EmbedUtil.error(info.getChannel(), "You must provide a valid command (do not include the prefix)!");
+                        return;
+                    }
+
+                    Permission permission = Arrays.stream(Permission.values()).filter(perm -> perm.name().equalsIgnoreCase(info.getArgs()[2])).findFirst().orElse(null);
+
+                    if(permission == null) {
+                        EmbedUtil.error(info.getChannel(), "You must provide a permission! Valid Permissions: `CREATE_INSTANT_INVITE, " +
+                                "KICK_MEMBERS, BAN_MEMBERS, ADMINISTRATOR, MANAGE_CHANNEL, MANAGE_SERVER, MESSAGE_ADD_REACTION, VIEW_AUDIT_LOGS, PRIORITY_SPEAKER, " +
+                                "VIEW_CHANNEL, MESSAGE_READ, MESSAGE_WRITE, MESSAGE_TTS, MESSAGE_MANAGE, MESSAGE_EMBED_LINKS, MESSAGE_ATTACH_FILES, MESSAGE_HISTORY, " +
+                                "MESSAGE_MENTION_EVERYONE, MESSAGE_EXT_EMOJI, VOICE_CONNECT, VOICE_SPEAK, VOICE_MUTE_OTHERS, VOICE_DEAF_OTHERS, VOICE_MOVE_OTHERS, " +
+                                "VOICE_USE_VAD, NICKNAME_CHANGE, NICKNAME_MANAGE, MANAGE_ROLES, MANAGE_PERMISSIONS, MANAGE_WEBHOOKS, MANAGE_EMOTES, UNKNOWN`");
+                        return;
+                    }
+
+                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).getCommandPermissions().put(info.getArgs()[1], permission);
+                    Bot.getInstance().getGuildConfigCache().get(info.getGuild().getIdLong()).save();
+                    EmbedUtil.info(info.getChannel(), "Permission Updated", "Successfully set " + info.getArgs()[1] + " command permission to " + permission.name() + "!");
+                } else {
+                    EmbedUtil.error(info.getChannel(), "You must provide a valid command and permission!");
+                }
+            } else if(info.getArgs()[0].equalsIgnoreCase("permissions")) {
+                displayCommandPermissions(info.getChannel());
             }
         }
+    }
+
+    private void displayCommandPermissions(TextChannel channel) {
+        GuildConfig guildConfig = Bot.getInstance().getGuildConfigCache().get(channel.getGuild().getIdLong());
+
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+                .setDescription("**Note**: All values can be changed using " + guildConfig.getCommandIndicator() +  "config permission <command> <permission>")
+                .setColor(new Color(10601844))
+                .setTimestamp(Instant.now())
+                .setFooter("Configuration", Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
+                .setAuthor("Configuration", null, Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl());
+
+        for (Command command : Bot.getInstance().getCommandManager().getCommandList()) {
+            embedBuilder.addField(guildConfig.getCommandIndicator() + command.getName(), Bot.getInstance().getCommandManager().getPermission(channel.getGuild().getIdLong(), command).name(), true);
+        }
+
+        Message message = new MessageBuilder(embedBuilder.build()).build();
+
+        channel.sendMessage(message).queue();
     }
 
     private void displayUpdate(TextChannel displayChannel, Member caller, String content) {
@@ -127,14 +196,16 @@ public class ConfigCommand extends Command {
         GuildConfig guildConfig = Bot.getInstance().getGuildConfigCache().get(channel.getGuild().getIdLong());
 
         Message message = new MessageBuilder(new EmbedBuilder()
-                .setDescription("**Note**: All values can be changed using " + Bot.getInstance().getGuildConfigCache().get(channel.getGuild().getIdLong()).getCommandIndicator() +  "guildConfig")
+                .setDescription("**Note**: All values can be changed using " + guildConfig.getCommandIndicator() +  "config")
                 .setColor(new Color(10601844))
                 .setTimestamp(Instant.now())
                 .setFooter("Configuration", Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .setAuthor("Configuration", null, Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .addField("Command Prefix", guildConfig.getCommandIndicator(), true)
+                .addField("Reaction State Permission", guildConfig.getReactionStatePermission().name(), true)
                 .addField("Default Suggestion Channel", Bot.getInstance().getJdaInstance().getTextChannelById(guildConfig.getDefaultSuggestionChannel()).getAsMention(), true)
-                .addField("Linked Channels", "Use >guildConfig linked to see linked channels.", true)
+                .addField("Linked Channels", "Use >config linked to see linked channels.", true)
+                .addField("Command Permissions", "Use >config permissions to see command permissions.", true)
                 .build()).build();
 
         channel.sendMessage(message).queue();
@@ -148,10 +219,13 @@ public class ConfigCommand extends Command {
                 .setFooter("Command List", Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .setAuthor("Configuration Commands", null, Bot.getInstance().getJdaInstance().getSelfUser().getAvatarUrl())
                 .addField("display", "Display the configuration values.", true)
-                .addField("default-channel (channel)", "Set the default suggestion channel.", true)
-                .addField("link-channel <channel> <channel>", "Link a channel to another channel, channel \nones suggestions will be sent to channel two.", true)
+                .addField("permissions", "Display the command permissions.", true)
                 .addField("prefix <string>", "Set the command prefix.", true)
                 .addField("linked (channel)", "See the channels linked channel.", true)
+                .addField("default-channel (channel)", "Set the default suggestion channel.", true)
+                .addField("reaction-permission <permission>", "Set the reaction accept/reject permission.", true)
+                .addField("link-channel <channel> <channel>", "Link a channel to another channel, channel \nones suggestions will be sent to channel two.", true)
+                .addField("permission <command> <permission>", "Set a commands permission requirement.", true)
                 .build()).build();
 
         channel.sendMessage(message).queue();
